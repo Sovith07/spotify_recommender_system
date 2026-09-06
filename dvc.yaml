@@ -1,0 +1,37 @@
+stages:
+  data_cleaning:
+    cmd: python src/data_cleaning.py
+    deps:
+      - data/raw/Music Info.csv
+      - src/data_cleaning.py
+    outs: 
+      - data/processed/cleaned_data.csv
+
+  transform_data:
+    cmd: python src/content_based_filtering.py
+    deps:
+      - data/processed/cleaned_data.csv
+      - src/content_based_filtering.py
+      - src/data_cleaning.py
+    outs:
+      - data/preprocessed/transformed_data.npz
+      - models/transformer.joblib
+
+  interaction_data:
+    cmd: python src/collaborative_filtering.py
+    deps:
+      - data/raw/User Listening History.csv
+      - src/collaborative_filtering.py
+      - data/processed/cleaned_data.csv
+    outs:
+      - data/preprocessed/track_ids.npy
+      - data/preprocessed/collab_filtered_data.csv
+      - data/preprocessed/interaction_matrix.npz
+
+#  transformed_filtered_data:
+#    cmd: python transform_filtered_data.py
+#    deps:
+#      - transform_filtered_data.py
+#      - data/collab_filtered_data.csv
+#    outs:
+#      - data/transformed_hybrid_data.npz
