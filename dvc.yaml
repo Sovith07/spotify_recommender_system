@@ -26,7 +26,7 @@ stages:
     outs:
       - data/preprocessed/track_ids.npy
       - data/preprocessed/collab_filtered_data.csv
-      - data/preprocessed/interaction_matrix.npz
+      - data/preprocessed/sparse_matrix.npz
 
 #  transformed_filtered_data:
 #    cmd: python transform_filtered_data.py

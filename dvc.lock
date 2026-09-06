@@ -53,14 +53,14 @@ stages:
       size: 602515573
     - path: src/collaborative_filtering.py
       hash: md5
-      md5: 0fa51829c6d085303aa59aad3d1ac8fd
-      size: 5412
+      md5: 33509eb59f66ed20896c3cbdfb0b0c26
+      size: 5383
     outs:
     - path: data/preprocessed/collab_filtered_data.csv
       hash: md5
       md5: f0f182d757a9837caa7ff619cab9ffd0
       size: 8260460
-    - path: data/preprocessed/interaction_matrix.npz
+    - path: data/preprocessed/sparse_matrix.npz
       hash: md5
       md5: 53f8fa1e7cec19856a6b2bc60ce8881f
       size: 32311353
