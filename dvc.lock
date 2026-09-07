@@ -68,3 +68,47 @@ stages:
       hash: md5
       md5: 4a52e4cb6bae6b0126c1344dac7c7686
       size: 640058
+  transformed_filtered_data:
+    cmd: python src/transform_filtered_data.py
+    deps:
+    - path: data/preprocessed/collab_filtered_data.csv
+      hash: md5
+      md5: f0f182d757a9837caa7ff619cab9ffd0
+      size: 8260460
+    - path: src/transform_filtered_data.py
+      hash: md5
+      md5: 8427da17cf58ea77ddc6bde1f5530d69
+      size: 781
+    outs:
+    - path: data/transformed_hybrid_data.npz
+      hash: md5
+      md5: 8f37bd9aeb4ffaa293c0dc62d4364775
+      size: 2977364
+  hybrid_recommendation:
+    cmd: python src/hybrid_recommendations.py
+    deps:
+    - path: data/preprocessed/sparse_matrix.npz
+      hash: md5
+      md5: 53f8fa1e7cec19856a6b2bc60ce8881f
+      size: 32311353
+    - path: data/preprocessed/track_ids.npy
+      hash: md5
+      md5: 4a52e4cb6bae6b0126c1344dac7c7686
+      size: 640058
+    - path: data/preprocessed/transformed_hybrid_data.npz
+      hash: md5
+      md5: 8f37bd9aeb4ffaa293c0dc62d4364775
+      size: 2977364
+    - path: models/transformer.joblib
+      hash: md5
+      md5: 823350f91c08f5ec1bef6099a2bbbf24
+      size: 135661
+    - path: src/hybrid_recommendations.py
+      hash: md5
+      md5: 1e5981de4b20baf61e269213d52053a5
+      size: 7531
+    outs:
+    - path: recommendations.json
+      hash: md5
+      md5: 59560205509599348a7e50c44d481355
+      size: 5810

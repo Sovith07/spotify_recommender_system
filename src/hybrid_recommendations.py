@@ -1,3 +1,4 @@
+import json
 import numpy as np
 import pandas as pd
 from scipy.sparse import load_npz
@@ -96,10 +97,53 @@ class HybridRecommenderSystem:
                         .loc[songs_data["track_id"].isin(recommendation_track_ids)]
                         .merge(scores_df,on="track_id")
                         .sort_values(by="score",ascending=False)
-                        .drop(columns=["track_id","score"])
                         .reset_index(drop=True)
                         )
         
-        return top_k_songs
+        # drop the seed song itself, trim to requested count
+        top_k_songs = top_k_songs.loc[
+            ~((top_k_songs["name"] == song_name) & (top_k_songs["artist"] == artist_name))
+        ].head(self.number_of_recommendations)
+        
+        # convert to JSON-serializable records, dropping track_id/score from the payload
+        recommendations_json = (
+        top_k_songs
+        .drop(columns=["track_id", "score"])
+        .to_dict(orient="records")
+        )
+
+        return json.dumps(recommendations_json, indent=2)
+
+    def save_recommendations(self, recommendations, output_path):
+        """recommendations is already a JSON string from give_recommendations."""
+        with open(output_path, "w", encoding="utf-8") as f:
+            f.write(recommendations)
+
     
-    
+    def load_all_data(self, transformed_matrix_path, sparse_matrix_path, track_ids_path, songs_data_path):
+        transformed_matrix = load_npz(transformed_matrix_path)
+        interaction_matrix = load_npz(sparse_matrix_path)
+        track_ids = np.load(track_ids_path, allow_pickle=True)
+        songs_data = pd.read_csv(songs_data_path)
+        return transformed_matrix, interaction_matrix, track_ids, songs_data
+
+if __name__ == "__main__":
+    recommender = HybridRecommenderSystem(number_of_recommendations=10, weight_content_based=0.5)
+
+    transformed_matrix, interaction_matrix, track_ids, songs_data = recommender.load_all_data(
+        transformed_matrix_path="data/preprocessed/transformed_hybrid_data.npz",
+        sparse_matrix_path="data/preprocessed/sparse_matrix.npz",
+        track_ids_path="data/preprocessed/track_ids.npy",
+        songs_data_path="data/preprocessed/collab_filtered_data.csv"
+    )
+
+    recommendations = recommender.give_recommendations(
+        song_name="it's about time",
+        artist_name="jamie cullum",
+        songs_data=songs_data,
+        track_ids=track_ids,
+        transformed_matrix=transformed_matrix,
+        interaction_matrix=interaction_matrix
+    )
+
+    recommender.save_recommendations(recommendations, "recommendations.json")
