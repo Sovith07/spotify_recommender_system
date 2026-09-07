@@ -1,5 +1,7 @@
 # Data
 data/raw/*.csv
+data/preprocessed/*
+data/processed/*
 
 # Mac OS-specific storage files
 .DS_Store
