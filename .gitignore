@@ -1,7 +1,12 @@
 # Data
 data/raw/*.csv
-data/preprocessed/*
+# Processed data
 data/processed/*
+!data/processed/.gitkeep
+
+# Preprocessed data
+data/preprocessed/*
+!data/preprocessed/.gitkeep
 
 # Mac OS-specific storage files
 .DS_Store
