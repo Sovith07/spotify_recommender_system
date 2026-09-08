@@ -29,7 +29,7 @@ class HybridRecommenderSystem:
         return content_similarity_scores
         
     
-    def __calculate_collaborative_filtering_similarities(self, song_name, artist_name, track_ids, songs_data, interaction_matrix):
+    def __calculate_collaborative_filtering_similarities(self, song_name, artist_name, track_ids, songs_data, sparse_matrix):
         # fetch the row from songs data
         song_row = songs_data.loc[(songs_data["name"] == song_name) & (songs_data["artist"] == artist_name)]
         # track_id of input song
@@ -37,9 +37,9 @@ class HybridRecommenderSystem:
         # index value of track_id
         ind = np.where(track_ids == input_track_id)[0].item()
         # fetch the input vector
-        input_array = interaction_matrix[ind]
+        input_array = sparse_matrix[ind]
         # get similarity scores
-        collaborative_similarity_scores = cosine_similarity(input_array, interaction_matrix)
+        collaborative_similarity_scores = cosine_similarity(input_array, sparse_matrix)
         return collaborative_similarity_scores
     
     
@@ -55,7 +55,7 @@ class HybridRecommenderSystem:
         return weighted_scores
     
     
-    def give_recommendations(self, song_name, artist_name, songs_data, track_ids, transformed_matrix, interaction_matrix):
+    def give_recommendations(self, song_name, artist_name, songs_data, track_ids, transformed_matrix, sparse_matrix):
         # calculate content based similarities
         content_based_similarities = self.__calculate_content_based_similarities(song_name= song_name, 
                                                                                artist_name= artist_name, 
@@ -67,7 +67,7 @@ class HybridRecommenderSystem:
                                                                                                    artist_name= artist_name, 
                                                                                                    track_ids= track_ids, 
                                                                                                    songs_data= songs_data, 
-                                                                                                   interaction_matrix= interaction_matrix)
+                                                                                                   sparse_matrix= sparse_matrix)
     
         # normalize content based similarities
         normalized_content_based_similarities = self.__normalize_similarities(content_based_similarities)
@@ -100,37 +100,26 @@ class HybridRecommenderSystem:
                         .reset_index(drop=True)
                         )
         
-        # drop the seed song itself, trim to requested count
-        top_k_songs = top_k_songs.loc[
-            ~((top_k_songs["name"] == song_name) & (top_k_songs["artist"] == artist_name))
-        ].head(self.number_of_recommendations)
         
-        # convert to JSON-serializable records, dropping track_id/score from the payload
-        recommendations_json = (
-        top_k_songs
-        .drop(columns=["track_id", "score"])
-        .to_dict(orient="records")
-        )
 
-        return json.dumps(recommendations_json, indent=2)
+        return top_k_songs.drop(columns=["track_id", "score"])
 
     def save_recommendations(self, recommendations, output_path):
-        """recommendations is already a JSON string from give_recommendations."""
-        with open(output_path, "w", encoding="utf-8") as f:
-            f.write(recommendations)
-
+      """recommendations is a list of dicts (JSON-serializable)."""
+      with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(recommendations, f, indent=2, ensure_ascii=False, default=str)
     
     def load_all_data(self, transformed_matrix_path, sparse_matrix_path, track_ids_path, songs_data_path):
         transformed_matrix = load_npz(transformed_matrix_path)
-        interaction_matrix = load_npz(sparse_matrix_path)
+        sparse_matrix = load_npz(sparse_matrix_path)
         track_ids = np.load(track_ids_path, allow_pickle=True)
         songs_data = pd.read_csv(songs_data_path)
-        return transformed_matrix, interaction_matrix, track_ids, songs_data
+        return transformed_matrix, sparse_matrix, track_ids, songs_data
 
 if __name__ == "__main__":
     recommender = HybridRecommenderSystem(number_of_recommendations=10, weight_content_based=0.5)
 
-    transformed_matrix, interaction_matrix, track_ids, songs_data = recommender.load_all_data(
+    transformed_matrix, sparse_matrix, track_ids, songs_data = recommender.load_all_data(
         transformed_matrix_path="data/preprocessed/transformed_hybrid_data.npz",
         sparse_matrix_path="data/preprocessed/sparse_matrix.npz",
         track_ids_path="data/preprocessed/track_ids.npy",
@@ -143,7 +132,10 @@ if __name__ == "__main__":
         songs_data=songs_data,
         track_ids=track_ids,
         transformed_matrix=transformed_matrix,
-        interaction_matrix=interaction_matrix
+        sparse_matrix=sparse_matrix
     )
 
-    recommender.save_recommendations(recommendations, "recommendations.json")
+    OUTPUT_PATH = "recommendations.json" 
+    recommendations_json = recommendations.to_dict(orient="records")
+    recommender.save_recommendations(recommendations_json, OUTPUT_PATH)
+    print(f"Saved {len(recommendations_json)} recommendations to {OUTPUT_PATH}")

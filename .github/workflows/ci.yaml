@@ -40,4 +40,10 @@ jobs:
         run: |
           dvc repro
 
+      - name: Smoke test Streamlit app
+        run: |
+          streamlit run streamlit_app/app.py --server.headless true --server.port 8501 &
+          sleep 10
+          curl --fail http://localhost:8501/_stcore/health
+
     
