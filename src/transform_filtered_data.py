@@ -6,7 +6,7 @@ from content_based_filtering import transform_data, save_transformed_data
 filtered_data_path = "data/preprocessed/collab_filtered_data.csv"
 
 # save path
-save_path = "data/transformed_hybrid_data.npz"
+save_path = "data/preprocessed/transformed_hybrid_data.npz"
 
 
 def main(data_path, save_path):
