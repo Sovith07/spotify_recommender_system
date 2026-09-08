@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-DATA_PATH = r"D:\vs code projects\spotify_recommender_system\data\raw\Music Info.csv"
+DATA_PATH = "data/raw/Music Info.csv"
 
 def clean_data(data):
     """
@@ -66,7 +66,7 @@ def main(data_path):
     cleaned_data = clean_data(data)
     
     # saved cleaned data
-    cleaned_data.to_csv(r"D:\vs code projects\spotify_recommender_system\data\processed\cleaned_data.csv",index=False)
+    cleaned_data.to_csv("data/processed/cleaned_data.csv",index=False)
     
 
 if __name__ == "__main__":
