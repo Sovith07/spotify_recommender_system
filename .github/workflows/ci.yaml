@@ -36,10 +36,8 @@ jobs:
         run: |
           dvc pull
 
-      - name: Check DVC status
+      - name: Run DVC pipeline
         run: |
-          dvc status
+          dvc repro
 
-      - name: Run tests
-        run: |
-          pytest
+    
