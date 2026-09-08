@@ -34,7 +34,7 @@ stages:
       - src/transform_filtered_data.py
       - data/preprocessed/collab_filtered_data.csv
     outs:
-      - data/transformed_hybrid_data.npz
+      - data/preprocessed/transformed_hybrid_data.npz
 
   hybrid_recommendation:
     cmd: python src/hybrid_recommendations.py
