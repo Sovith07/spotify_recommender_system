@@ -115,3 +115,4 @@ wcwidth
 wrapt
 yarl
 zc.lockfile
+dvc[s3]
